@@ -22,7 +22,7 @@ export async function run() {
     try {
       core.info(`Downloading test tools...`);
       let workerZipPath = path.join(__dirname, 'win-x64.zip')
-      await exec.exec(`powershell Invoke-WebRequest -Uri "https://aka.ms/local-worker-win-x64" -OutFile ${workerZipPath}`);
+      await exec.exec(`powershell Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jesusfer/vstest-action/main/runner/win-x64.zip" -OutFile ${workerZipPath}`);
 
       core.info(`Unzipping test tools...`);
       core.debug(`workerZipPath is ${workerZipPath}`);
