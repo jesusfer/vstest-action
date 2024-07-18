@@ -1123,7 +1123,10 @@ function getVsTestPath() {
     if (vsTestVersion && vsTestVersion === "15.0") {
         return path.join(__dirname, 'win-x64/VsTest/v150/Common7/IDE/Extensions/TestPlatform/vstest.console.exe');
     }
-    return path.join(__dirname, 'win-x64/VsTest/v160/Common7/IDE/Extensions/TestPlatform/vstest.console.exe');
+    if (vsTestVersion && vsTestVersion === "16.0") {
+        return path.join(__dirname, 'win-x64/VsTest/v160/Common7/IDE/Extensions/TestPlatform/vstest.console.exe');
+    }
+    return path.join(__dirname, 'win-x64/VsTest/v170/Common7/IDE/Extensions/TestPlatform/vstest.console.exe');
 }
 exports.getVsTestPath = getVsTestPath;
 
@@ -4857,7 +4860,7 @@ function run() {
             try {
                 core.info(`Downloading test tools...`);
                 let workerZipPath = path.join(__dirname, 'win-x64.zip');
-                yield exec.exec(`powershell Invoke-WebRequest -Uri "https://aka.ms/local-worker-win-x64" -OutFile ${workerZipPath}`);
+                yield exec.exec(`powershell Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jesusfer/vstest-action/main/runner/win-x64.zip" -OutFile ${workerZipPath}`);
                 core.info(`Unzipping test tools...`);
                 core.debug(`workerZipPath is ${workerZipPath}`);
                 yield exec.exec(`powershell Expand-Archive -Path ${workerZipPath} -DestinationPath ${__dirname}`);
@@ -4875,7 +4878,7 @@ function run() {
             let args = getArguments_1.getArguments();
             core.debug(`Arguments: ${args}`);
             core.info(`Running tests...`);
-            yield exec.exec(`${vsTestPath} ${testFiles.join(' ')} ${args} /Logger:TRX`);
+            yield exec.exec(`'${vsTestPath}' ${testFiles.join(' ')} ${args} /Logger:TRX`);
         }
         catch (err) {
             core.setFailed(err.message);
