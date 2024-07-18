@@ -9,7 +9,7 @@ import {getVsTestPath} from './getVsTestPath'
 export async function run() {
   try {
     let testFiles = await getTestAssemblies();
-    if(testFiles.length == 0) {
+    if (testFiles.length == 0) {
       throw new Error('No matched test files!')
     }
 
@@ -20,12 +20,23 @@ export async function run() {
 
     core.info(`Downloading test tools...`);
     let workerZipPath = path.join(__dirname, 'win-x64.zip')
-    await exec.exec(`powershell Invoke-WebRequest -Uri "https://aka.ms/local-worker-win-x64" -OutFile ${workerZipPath}`);
+    let downloadSucceeded = true
+    try {
+      await exec.exec(`powershell Invoke-WebRequest -Uri "https://aka.ms/local-worker-win-x64" -OutFile ${workerZipPath}`);
 
-    core.info(`Unzipping test tools...`);
-    core.debug(`workerZipPath is ${workerZipPath}`);
-    await exec.exec(`powershell Expand-Archive -Path ${workerZipPath} -DestinationPath ${__dirname}`);
+      core.info(`Unzipping test tools...`);
+      core.debug(`workerZipPath is ${workerZipPath}`);
+      await exec.exec(`powershell Expand-Archive -Path ${workerZipPath} -DestinationPath ${__dirname}`);
+    } catch (error) {
+      core.info(`Downloading test tools failed: ${error}`)
+      downloadSucceeded = false
+    }
 
+    let vstestLocationMethod = core.getInput('vstestLocationMethod')
+
+    if (!downloadSucceeded && !vstestLocationMethod) {
+      throw `Download failed and not location method specified`
+    }
     let vsTestPath = getVsTestPath();
     core.debug(`VsTestPath: ${vsTestPath}`);
 
