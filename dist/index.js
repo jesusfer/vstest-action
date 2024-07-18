@@ -4856,29 +4856,31 @@ function run() {
             testFiles.forEach(function (file) {
                 core.debug(`${file}`);
             });
-            let downloadSucceeded = true;
-            try {
-                core.info(`Downloading test tools...`);
-                let workerZipPath = path.join(__dirname, 'win-x64.zip');
-                yield exec.exec(`powershell Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jesusfer/vstest-action/main/runner/win-x64.zip" -OutFile ${workerZipPath}`);
-                core.info(`Unzipping test tools...`);
-                core.debug(`workerZipPath is ${workerZipPath}`);
-                yield exec.exec(`powershell Expand-Archive -Path ${workerZipPath} -DestinationPath ${__dirname}`);
-            }
-            catch (error) {
-                core.info(`Downloading test tools failed: ${error}`);
-                downloadSucceeded = false;
-            }
             let vstestLocationMethod = core.getInput('vstestLocationMethod');
-            if (!downloadSucceeded && !vstestLocationMethod) {
-                throw `Download failed and not location method specified`;
+            if (!(vstestLocationMethod && vstestLocationMethod.toUpperCase() === "LOCATION")) {
+                let downloadSucceeded = true;
+                try {
+                    core.info(`Downloading test tools...`);
+                    let workerZipPath = path.join(__dirname, 'win-x64.zip');
+                    yield exec.exec(`powershell Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jesusfer/vstest-action/main/runner/win-x64.zip" -OutFile ${workerZipPath}`);
+                    core.info(`Unzipping test tools...`);
+                    core.debug(`workerZipPath is ${workerZipPath}`);
+                    yield exec.exec(`powershell Expand-Archive -Path ${workerZipPath} -DestinationPath ${__dirname}`);
+                }
+                catch (error) {
+                    core.info(`Downloading test tools failed: ${error}`);
+                    downloadSucceeded = false;
+                }
+                if (!downloadSucceeded && !vstestLocationMethod) {
+                    throw `Download failed and no location method specified`;
+                }
             }
             let vsTestPath = getVsTestPath_1.getVsTestPath();
             core.debug(`VsTestPath: ${vsTestPath}`);
             let args = getArguments_1.getArguments();
             core.debug(`Arguments: ${args}`);
             core.info(`Running tests...`);
-            yield exec.exec(`'${vsTestPath}' ${testFiles.join(' ')} ${args} /Logger:TRX`);
+            yield exec.exec(`${vsTestPath} ${testFiles.join(' ')} ${args} /Logger:TRX`);
         }
         catch (err) {
             core.setFailed(err.message);

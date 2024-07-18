@@ -365,3 +365,4 @@ dist/.github/
 TestResults/
 obj/
 coverage/
+tmp/
