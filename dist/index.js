@@ -1114,7 +1114,12 @@ const path = __importStar(__webpack_require__(622));
 function getVsTestPath() {
     let vstestLocationMethod = core.getInput('vstestLocationMethod');
     if (vstestLocationMethod && vstestLocationMethod.toUpperCase() === "LOCATION") {
-        return `"${path.join(core.getInput('vstestLocation'))}"`;
+        const customLocation = core.getInput('vstestLocation');
+        if (!customLocation) {
+            throw `Custom location cannot be empty!`;
+        }
+        //  Quote in case the location includes a space
+        return `"${path.join(customLocation)}"`;
     }
     let vsTestVersion = core.getInput('vsTestVersion');
     if (vsTestVersion && vsTestVersion === "14.0") {
@@ -4856,8 +4861,9 @@ function run() {
             testFiles.forEach(function (file) {
                 core.debug(`${file}`);
             });
-            let vstestLocationMethod = core.getInput('vstestLocationMethod');
-            if (!(vstestLocationMethod && vstestLocationMethod.toUpperCase() === "LOCATION")) {
+            const vstestLocationMethod = core.getInput('vstestLocationMethod');
+            const wantsCustomLocation = vstestLocationMethod && vstestLocationMethod.toUpperCase() === "LOCATION";
+            if (!wantsCustomLocation) {
                 let downloadSucceeded = true;
                 try {
                     core.info(`Downloading test tools...`);
@@ -4872,7 +4878,7 @@ function run() {
                     downloadSucceeded = false;
                 }
                 if (!downloadSucceeded && !vstestLocationMethod) {
-                    throw `Download failed and no location method specified`;
+                    throw `Download failed and no custom location method specified`;
                 }
             }
             let vsTestPath = getVsTestPath_1.getVsTestPath();

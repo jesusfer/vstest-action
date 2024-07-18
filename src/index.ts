@@ -18,8 +18,10 @@ export async function run() {
       core.debug(`${file}`)
     });
 
-    let vstestLocationMethod = core.getInput('vstestLocationMethod')
-    if (!(vstestLocationMethod && vstestLocationMethod.toUpperCase() === "LOCATION")) {
+    const vstestLocationMethod = core.getInput('vstestLocationMethod')
+    const wantsCustomLocation = vstestLocationMethod && vstestLocationMethod.toUpperCase() === "LOCATION"
+
+    if (!wantsCustomLocation) {
       let downloadSucceeded = true
       try {
         core.info(`Downloading test tools...`);
@@ -35,7 +37,7 @@ export async function run() {
       }
 
       if (!downloadSucceeded && !vstestLocationMethod) {
-        throw `Download failed and no location method specified`
+        throw `Download failed and no custom location method specified`
       }
     }
 
